@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: college-event-deployment
+  labels:
+    app: college-event
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: college-event
+
+  template:
+    metadata:
+      labels:
+        app: college-event
+
+    spec:
+      containers:
+        - name: college-event
+          image: college-event:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
