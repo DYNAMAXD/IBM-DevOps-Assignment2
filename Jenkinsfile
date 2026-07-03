@@ -1,52 +1,46 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven3'
+    }
+
     environment {
-        IMAGE_NAME = 'college-event'
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        IMAGE_NAME = "college-event-website:latest"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/DYNAMAXD/IBM-DevOps-Assignment2.git'
             }
         }
 
-        stage('Build') {
+        stage('Maven Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'mvn test'
+                bat 'mvn clean package'   // use sh on Linux/Mac agents
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                bat 'docker build -t %IMAGE_NAME% .'
+            }
+        }
+
+        stage('Docker Run (smoke test)') {
+            steps {
+                bat 'docker rm -f event-site-test || exit 0'
+                bat 'docker run -d -p 8081:8080 --name event-site-test %IMAGE_NAME%'
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f k8s/deployment.yaml'
-                sh 'kubectl apply -f k8s/service.yaml'
-                sh "kubectl set image deployment/college-event-deployment college-event=${IMAGE_NAME}:${IMAGE_TAG}"
+                bat 'kubectl apply -f k8s/deployment.yaml'
+                bat 'kubectl apply -f k8s/service.yaml'
+                bat 'kubectl rollout restart deployment event-website-deployment'
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline completed successfully.'
-        }
-        failure {
-            echo 'Pipeline failed.'
         }
     }
 }
