@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: college-event
-          image: college-event:latest
+          image: college-event-website:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 8080

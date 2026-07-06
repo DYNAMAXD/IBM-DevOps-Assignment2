@@ -39,7 +39,7 @@ pipeline {
             steps {
                 bat 'kubectl apply -f k8s/deployment.yaml'
                 bat 'kubectl apply -f k8s/service.yaml'
-                bat 'kubectl rollout restart deployment event-website-deployment'
+                bat 'kubectl rollout restart deployment college-event-deployment'
             }
         }
     }
