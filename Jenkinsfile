@@ -28,6 +28,12 @@ pipeline {
             }
         }
 
+        stage('Load Image to Kind') {
+            steps {
+                bat 'kind load docker-image college-event-website:latest --name desktop'
+            }
+        }
+
         stage('Docker Run (smoke test)') {
             steps {
                 bat 'docker rm -f event-site-test || exit 0'
